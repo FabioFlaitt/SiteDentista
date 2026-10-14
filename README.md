@@ -119,12 +119,9 @@ npm run format
 
 ## Deploy
 
-Passo a passo em [`docs/DEPLOY.md`](docs/DEPLOY.md). Resumo:
+**Receita oficial (free, auto-deploy):** [`docs/HOSTING.md`](docs/HOSTING.md) — tudo na Render.com via Blueprint ([`render.yaml`](render.yaml)) + GitHub Actions ([`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)). CI roda build+testes; só se tudo passar, dispara os Deploy Hooks da Render.
 
-- **Frontend** → Vercel (root = `frontend/`, build command = `npm run build`, output = `dist/bruna-molina-frontend/browser`, SPA fallback via `vercel.json`).
-- **Backend** → Azure App Service (ou Render/Railway/Fly.io), com PostgreSQL gerenciado, CORS para o domínio da Vercel e variáveis de ambiente definidas no painel.
-
-A Vercel **não executa** ASP.NET Core tradicional. Hospedagens são separadas.
+Guia detalhado alternativo (Vercel + Azure) em [`docs/DEPLOY.md`](docs/DEPLOY.md).
 
 ## Segurança
 

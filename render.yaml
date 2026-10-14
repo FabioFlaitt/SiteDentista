@@ -1,0 +1,90 @@
+# Render.com Blueprint — provisiona frontend, backend e PostgreSQL em uma única
+# importação. Depois de conectar o repositório na Render (New → Blueprint),
+# ela cria os três recursos e preenche os cross-service env vars automaticamente.
+#
+# Importante: deixe "Auto-Deploy" DESLIGADO nos dois serviços após a criação,
+# para que apenas o GitHub Actions dispare deploys (via Deploy Hook) depois
+# que a CI passar.
+
+databases:
+  - name: brunamolina-pg
+    databaseName: brunamolina
+    user: brunamolina
+    plan: free
+    postgresMajorVersion: 16
+
+services:
+  # ---------- Frontend (Static Site) ----------
+  - type: web
+    name: brunamolina-frontend
+    runtime: static
+    plan: free
+    buildCommand: cd frontend && npm ci && npm run build
+    staticPublishPath: frontend/dist/bruna-molina-frontend/browser
+    buildFilter:
+      paths:
+        - frontend/**
+    headers:
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: X-Frame-Options
+        value: SAMEORIGIN
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: NG_APP_API_BASE_URL
+        fromService:
+          type: web
+          name: brunamolina-api
+          property: host
+      - key: NG_APP_SITE_URL
+        sync: false # preenchido manualmente com o domínio final
+
+  # ---------- Backend (Web Service, .NET 8) ----------
+  - type: web
+    name: brunamolina-api
+    runtime: dotnet
+    plan: free
+    region: oregon
+    buildCommand: cd backend && dotnet publish BrunaMolina.Api/BrunaMolina.Api.csproj -c Release -o out
+    startCommand: cd backend/out && dotnet BrunaMolina.Api.dll
+    healthCheckPath: /api/health
+    buildFilter:
+      paths:
+        - backend/**
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ASPNETCORE_URLS
+        value: http://0.0.0.0:10000
+      - key: PORT
+        value: 10000
+      - key: ConnectionStrings__Default
+        fromDatabase:
+          name: brunamolina-pg
+          property: connectionString
+      - key: Cors__AllowedOrigins__0
+        fromService:
+          type: web
+          name: brunamolina-frontend
+          property: host
+      - key: Cookie__Name
+        value: .BrunaMolina.Auth
+      - key: AdminSeed__Enabled
+        sync: false # defina true + Email + Password SOMENTE no primeiro deploy
+      - key: AdminSeed__Email
+        sync: false
+      - key: AdminSeed__Password
+        sync: false
+      - key: AdminSeed__DisplayName
+        value: Administradora

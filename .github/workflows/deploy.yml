@@ -1,0 +1,189 @@
+name: Build & Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  # ---------------- Frontend ----------------
+  frontend:
+    name: Frontend — build & test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    outputs:
+      changed: ${{ steps.changes.outputs.changed }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Detect frontend changes
+        id: changes
+        shell: bash
+        run: |
+          if git diff --name-only HEAD^ HEAD | grep -qE '^(frontend/|render.yaml|\.github/workflows/deploy\.yml)'; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-node@v4
+        if: steps.changes.outputs.changed == 'true'
+        with:
+          node-version: '20.17.0'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install
+        if: steps.changes.outputs.changed == 'true'
+        run: npm ci
+
+      - name: Prettier check
+        if: steps.changes.outputs.changed == 'true'
+        run: npm run format:check
+        continue-on-error: true
+
+      - name: Lint
+        if: steps.changes.outputs.changed == 'true'
+        run: npm run lint
+        continue-on-error: true
+
+      - name: Unit tests (headless)
+        if: steps.changes.outputs.changed == 'true'
+        run: npm test -- --watch=false --browsers=ChromeHeadless --code-coverage=false
+
+      - name: Production build
+        if: steps.changes.outputs.changed == 'true'
+        run: npm run build
+
+  # ---------------- Backend ----------------
+  backend:
+    name: Backend — build & test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    outputs:
+      changed: ${{ steps.changes.outputs.changed }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Detect backend changes
+        id: changes
+        shell: bash
+        run: |
+          if git diff --name-only HEAD^ HEAD | grep -qE '^(backend/|render.yaml|\.github/workflows/deploy\.yml)'; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-dotnet@v4
+        if: steps.changes.outputs.changed == 'true'
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore
+        if: steps.changes.outputs.changed == 'true'
+        run: dotnet restore
+
+      - name: Build (Release)
+        if: steps.changes.outputs.changed == 'true'
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Test
+        if: steps.changes.outputs.changed == 'true'
+        run: dotnet test --configuration Release --no-build --logger "trx;LogFileName=test-results.trx"
+
+      - name: Upload test results
+        if: always() && steps.changes.outputs.changed == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: dotnet-test-results
+          path: backend/**/TestResults/*.trx
+
+  # ---------------- Deploy (only on main) ----------------
+  deploy-frontend:
+    name: Deploy frontend to Render
+    needs: [frontend, backend]
+    if: |
+      github.event_name != 'pull_request' &&
+      github.ref == 'refs/heads/main' &&
+      needs.frontend.outputs.changed == 'true' &&
+      needs.frontend.result == 'success' &&
+      (needs.backend.result == 'success' || needs.backend.result == 'skipped')
+    runs-on: ubuntu-latest
+    environment:
+      name: production-frontend
+      url: ${{ vars.FRONTEND_URL }}
+    steps:
+      - name: Trigger Render deploy hook (frontend)
+        shell: bash
+        env:
+          HOOK_URL: ${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$HOOK_URL" ]; then
+            echo "::error::RENDER_FRONTEND_DEPLOY_HOOK secret not set"
+            exit 1
+          fi
+          http_status=$(curl -sS -o response.txt -w "%{http_code}" -X POST "$HOOK_URL")
+          echo "HTTP $http_status"
+          cat response.txt
+          [ "$http_status" -ge 200 ] && [ "$http_status" -lt 300 ]
+
+  deploy-backend:
+    name: Deploy backend to Render
+    needs: [frontend, backend]
+    if: |
+      github.event_name != 'pull_request' &&
+      github.ref == 'refs/heads/main' &&
+      needs.backend.outputs.changed == 'true' &&
+      needs.backend.result == 'success' &&
+      (needs.frontend.result == 'success' || needs.frontend.result == 'skipped')
+    runs-on: ubuntu-latest
+    environment:
+      name: production-backend
+      url: ${{ vars.BACKEND_URL }}
+    steps:
+      - name: Trigger Render deploy hook (backend)
+        shell: bash
+        env:
+          HOOK_URL: ${{ secrets.RENDER_BACKEND_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$HOOK_URL" ]; then
+            echo "::error::RENDER_BACKEND_DEPLOY_HOOK secret not set"
+            exit 1
+          fi
+          http_status=$(curl -sS -o response.txt -w "%{http_code}" -X POST "$HOOK_URL")
+          echo "HTTP $http_status"
+          cat response.txt
+          [ "$http_status" -ge 200 ] && [ "$http_status" -lt 300 ]
+
+      - name: Wait for backend to be healthy
+        shell: bash
+        env:
+          HEALTH_URL: ${{ vars.BACKEND_URL }}/api/health
+        run: |
+          if [ -z "$HEALTH_URL" ] || [ "$HEALTH_URL" = "/api/health" ]; then
+            echo "BACKEND_URL variable not set, skipping health check"
+            exit 0
+          fi
+          for i in $(seq 1 40); do
+            code=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 10 "$HEALTH_URL" || echo 000)
+            echo "attempt $i → $code"
+            [ "$code" = "200" ] && exit 0
+            sleep 15
+          done
+          echo "::error::Backend did not become healthy within 10 minutes"
+          exit 1
