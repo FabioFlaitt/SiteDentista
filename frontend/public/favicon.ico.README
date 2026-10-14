@@ -1,0 +1,5 @@
+Placeholder: substituir por um favicon real (16x16, 32x32, 48x48).
+
+O arquivo `favicon.ico` deve ser colocado em `frontend/public/favicon.ico`
+para que o Angular o copie para o diretório `browser/` durante o build e
+seja referenciado pelo `<link rel="icon">` no `index.html`.

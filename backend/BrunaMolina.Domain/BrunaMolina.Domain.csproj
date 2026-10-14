@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>BrunaMolina.Domain</RootNamespace>
+  </PropertyGroup>
+</Project>

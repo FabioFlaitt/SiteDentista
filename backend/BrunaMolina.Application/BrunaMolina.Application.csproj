@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>BrunaMolina.Application</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BrunaMolina.Domain\BrunaMolina.Domain.csproj" />
+  </ItemGroup>
+</Project>

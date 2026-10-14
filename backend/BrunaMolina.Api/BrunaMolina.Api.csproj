@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <RootNamespace>BrunaMolina.Api</RootNamespace>
+    <UserSecretsId>brunamolina-api-dev-secrets</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="2.3.0" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.10">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BrunaMolina.Application\BrunaMolina.Application.csproj" />
+    <ProjectReference Include="..\BrunaMolina.Domain\BrunaMolina.Domain.csproj" />
+    <ProjectReference Include="..\BrunaMolina.Infrastructure\BrunaMolina.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>

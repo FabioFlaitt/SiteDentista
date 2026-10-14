@@ -1,0 +1,22 @@
+import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
+import { provideRouter, withInMemoryScrolling, withViewTransitions } from '@angular/router';
+import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
+import { provideClientHydration } from '@angular/platform-browser';
+import { routes } from './app.routes';
+import { authInterceptor } from './core/interceptors/auth.interceptor';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideZoneChangeDetection({ eventCoalescing: true }),
+    provideRouter(
+      routes,
+      withViewTransitions(),
+      withInMemoryScrolling({
+        scrollPositionRestoration: 'enabled',
+        anchorScrolling: 'enabled',
+      }),
+    ),
+    provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
+    provideClientHydration(),
+  ],
+};
