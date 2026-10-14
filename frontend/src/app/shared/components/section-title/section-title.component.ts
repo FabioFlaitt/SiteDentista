@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { booleanAttribute, ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -25,5 +25,5 @@ export class SectionTitleComponent {
   @Input({ required: true }) title!: string;
   @Input() eyebrow?: string;
   @Input() subtitle?: string;
-  @Input() center = false;
+  @Input({ transform: booleanAttribute }) center = false;
 }

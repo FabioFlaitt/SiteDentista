@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { BaseChartDirective } from 'ng2-charts';
+import { NgChartsModule } from 'ng2-charts';
 import { ChartConfiguration } from 'chart.js';
 import {
   AdminAnalyticsService,
@@ -22,7 +22,7 @@ function todayIso(offset = 0): string {
   standalone: true,
   imports: [
     CommonModule,
-    BaseChartDirective,
+    NgChartsModule,
     PeriodFilterComponent,
     MockBadgeComponent,
     LoadingSkeletonComponent,

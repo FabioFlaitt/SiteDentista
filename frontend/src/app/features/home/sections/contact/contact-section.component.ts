@@ -27,7 +27,7 @@ import { environment } from '../../../../../environments/environment';
             <li class="flex items-center gap-3">
               <lucide-angular name="message-circle" [size]="20" aria-hidden="true"></lucide-angular>
               <a
-                [href]="whatsappUrl"
+                [href]="whatsappUrl()"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="font-semibold text-brand-800"

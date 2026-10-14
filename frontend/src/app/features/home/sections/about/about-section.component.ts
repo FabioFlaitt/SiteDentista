@@ -14,15 +14,18 @@ import { WhatsAppService } from '../../../../core/services/whatsapp.service';
   template: `
     <section id="sobre" class="section bg-surface-muted" aria-labelledby="about-title">
       <div class="container-page grid md:grid-cols-5 gap-10 items-start">
-        <figure
-          class="md:col-span-2 aspect-[4/5] rounded-2xl overflow-hidden
-                 bg-gradient-to-br from-accent-50 to-brand-100 shadow-card
-                 flex items-center justify-center text-brand-700"
-        >
-          <!-- TODO: substituir por fotografia profissional autorizada. -->
-          <lucide-angular name="user-round" [size]="96" aria-hidden="true"></lucide-angular>
+        <figure class="md:col-span-2 aspect-[4/5] rounded-2xl overflow-hidden shadow-card bg-brand-50">
+          <img
+            src="/images/dra-bruna-sorriso.jpg"
+            alt="Retrato da Dra. Bruna Molina sorrindo, vestindo jaleco preto, no consultório"
+            class="w-full h-full object-cover"
+            width="960"
+            height="1280"
+            loading="lazy"
+          />
           <figcaption class="sr-only">
-            Fotografia da Dra. Bruna — substituir após autorização.
+            {{ siteConfig.professional.name }} —
+            {{ siteConfig.professional.title }}.
           </figcaption>
         </figure>
 

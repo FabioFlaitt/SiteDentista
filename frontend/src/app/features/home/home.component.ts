@@ -3,6 +3,7 @@ import { HeroComponent } from './sections/hero/hero.component';
 import { AboutSectionComponent } from './sections/about/about-section.component';
 import { ServicesSectionComponent } from './sections/services/services-section.component';
 import { DifferentialsSectionComponent } from './sections/differentials/differentials-section.component';
+import { ClinicSectionComponent } from './sections/clinic/clinic-section.component';
 import { LocationSectionComponent } from './sections/location/location-section.component';
 import { ContactSectionComponent } from './sections/contact/contact-section.component';
 
@@ -14,6 +15,7 @@ import { ContactSectionComponent } from './sections/contact/contact-section.comp
     AboutSectionComponent,
     ServicesSectionComponent,
     DifferentialsSectionComponent,
+    ClinicSectionComponent,
     LocationSectionComponent,
     ContactSectionComponent,
   ],
@@ -23,6 +25,7 @@ import { ContactSectionComponent } from './sections/contact/contact-section.comp
     <app-about-section />
     <app-services-section />
     <app-differentials-section />
+    <app-clinic-section />
     <app-location-section />
     <app-contact-section />
   `,

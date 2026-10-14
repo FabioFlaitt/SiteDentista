@@ -62,26 +62,25 @@ import { WhatsAppService } from '../../../../core/services/whatsapp.service';
         </div>
 
         <figure
-          class="relative aspect-[4/5] md:aspect-square rounded-2xl overflow-hidden
-                 bg-gradient-to-br from-brand-100 via-surface to-accent-100 shadow-card"
+          class="relative aspect-[4/5] md:aspect-[4/5] rounded-2xl overflow-hidden shadow-card
+                 bg-brand-50"
         >
-          <!--
-            TODO: substituir pelo retrato profissional autorizado da Dra. Bruna.
-            Placeholder evita invenção de uma imagem pessoal.
-          -->
+          <img
+            src="/images/dra-bruna-portrait.jpg"
+            alt="Dra. Bruna Molina, cirurgiã-dentista CRO-SP 145594, no consultório em Araraquara/SP"
+            class="w-full h-full object-cover"
+            width="960"
+            height="1280"
+            fetchpriority="high"
+          />
           <div
-            class="absolute inset-0 flex items-end justify-center p-6 text-brand-700"
-            aria-hidden="true"
+            class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-brand-900/80 to-transparent"
           >
-            <svg viewBox="0 0 160 160" class="w-40 h-40 opacity-80" fill="currentColor">
-              <path
-                d="M80 10c22 0 40 18 40 40 0 15-8 28-20 35v15h20c15 0 25 10 25 25v25H15v-25c0-15 10-25 25-25h20v-15C48 78 40 65 40 50c0-22 18-40 40-40z"
-              />
-            </svg>
+            <p class="text-white text-sm font-medium">{{ siteConfig.professional.name }}</p>
+            <p class="text-white/80 text-xs">
+              {{ siteConfig.professional.title }} · {{ siteConfig.professional.registration }}
+            </p>
           </div>
-          <figcaption class="sr-only">
-            Imagem ilustrativa — substituir por fotografia profissional autorizada.
-          </figcaption>
         </figure>
       </div>
     </section>

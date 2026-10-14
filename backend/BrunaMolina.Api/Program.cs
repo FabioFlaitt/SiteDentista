@@ -1,10 +1,10 @@
-using System.Threading.RateLimiting;
 using BrunaMolina.Api.Middleware;
 using BrunaMolina.Infrastructure;
 using BrunaMolina.Infrastructure.Identity;
 using BrunaMolina.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
@@ -45,7 +45,12 @@ builder.Services.AddCors(opts =>
     });
 });
 
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    })
     .AddCookie(options =>
     {
         options.Cookie.Name = builder.Configuration["Cookie:Name"] ?? ".BrunaMolina.Auth";

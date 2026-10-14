@@ -4,9 +4,9 @@ using BrunaMolina.Infrastructure.Identity;
 using BrunaMolina.Infrastructure.Persistence;
 using BrunaMolina.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace BrunaMolina.Infrastructure;
 
@@ -24,7 +24,7 @@ public static class DependencyInjection
                 npg.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName)));
 
         services
-            .AddIdentityCore<AdminUser>(opts =>
+            .AddIdentity<AdminUser, IdentityRole<Guid>>(opts =>
             {
                 opts.Password.RequiredLength = 10;
                 opts.Password.RequireDigit = true;
@@ -36,9 +36,7 @@ public static class DependencyInjection
                 opts.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
                 opts.User.RequireUniqueEmail = true;
             })
-            .AddRoles<IdentityRole<Guid>>()
             .AddEntityFrameworkStores<AppDbContext>()
-            .AddSignInManager()
             .AddDefaultTokenProviders();
 
         services.AddScoped<IAnalyticsRepository, AnalyticsRepository>();

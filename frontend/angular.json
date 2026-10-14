@@ -32,13 +32,6 @@
             ],
             "styles": ["src/styles.css"],
             "scripts": [],
-            "server": "src/main.server.ts",
-            "prerender": {
-              "routesFile": "prerender-routes.txt"
-            },
-            "ssr": {
-              "entry": "src/server.ts"
-            }
           },
           "configurations": {
             "production": {
